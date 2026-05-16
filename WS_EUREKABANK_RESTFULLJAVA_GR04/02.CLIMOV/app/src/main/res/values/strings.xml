@@ -1,0 +1,41 @@
+<resources>
+    <string name="app_name">EurekaBank</string>
+    
+    <!-- Login Screen -->
+    <string name="bienvenida">¡Bienvenido!</string>
+    <string name="subtitulo_login">EurekaBank | Liga de Quito</string>
+    <string name="usuario">Usuario</string>
+    <string name="contrasena">Contraseña</string>
+    <string name="iniciar_sesion">Iniciar Sesión</string>
+    <string name="credenciales_incorrectas">❌ Credenciales incorrectas</string>
+    <string name="ingrese_credenciales">Por favor, ingrese sus credenciales</string>
+    
+    <!-- Main Screen -->
+    <string name="titulo_conversiones">Conversión de Unidades</string>
+    <string name="seleccione_conversion">Seleccione el tipo de conversión</string>
+    
+    <!-- Longitud -->
+    <string name="conversion_longitud">📏 Longitud</string>
+    <string name="centimetros">Centímetros (cm)</string>
+    <string name="pulgadas">Pulgadas (in)</string>
+    <string name="btn_cm_to_in">Convertir a Pulgadas</string>
+    <string name="btn_in_to_cm">Convertir a Centímetros</string>
+    
+    <!-- Temperatura -->
+    <string name="conversion_temperatura">🌡️ Temperatura</string>
+    <string name="celsius">Celsius (°C)</string>
+    <string name="fahrenheit">Fahrenheit (°F)</string>
+    <string name="btn_c_to_f">Convertir a Fahrenheit</string>
+    <string name="btn_f_to_c">Convertir a Celsius</string>
+    
+    <!-- Masa -->
+    <string name="conversion_masa">⚖️ Masa</string>
+    <string name="kilogramos">Kilogramos (kg)</string>
+    <string name="libras">Libras (lb)</string>
+    <string name="btn_kg_to_lb">Convertir a Libras</string>
+    <string name="btn_lb_to_kg">Convertir a Kilogramos</string>
+    
+    <!-- Resultados -->
+    <string name="resultado">✨ Resultado</string>
+    <string name="esperando_conversion">Ingrese un valor y presione un botón de conversión</string>
+</resources>
