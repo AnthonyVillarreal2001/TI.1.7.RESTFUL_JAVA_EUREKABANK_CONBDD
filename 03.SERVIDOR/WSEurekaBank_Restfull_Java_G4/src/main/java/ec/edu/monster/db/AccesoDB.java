@@ -10,8 +10,8 @@ import java.sql.SQLException;
 public class AccesoDB {
     
     private static final String URL = "jdbc:mysql://localhost:3306/eurekabank?autoReconnect=true&useSSL=false"; 
-    private static final String USER = "MONSTER"; 
-    private static final String PASS = "MONSTER9"; 
+    private static final String USER = "root"; 
+    private static final String PASS = ""; 
 
     public AccesoDB() { 
 
