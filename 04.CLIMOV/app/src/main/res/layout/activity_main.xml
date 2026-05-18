@@ -3,7 +3,17 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/purple_gradient_background">
+    >
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:src="@drawable/fondo"
+        android:scaleType="centerCrop" />
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#A0000000" />
+
 
     <ScrollView
         android:layout_width="match_parent"
@@ -74,7 +84,7 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="@color/primary"
+                    android:background="#0a3d62"
                     android:padding="16dp"
                     android:orientation="horizontal"
                     android:gravity="center_vertical">
@@ -131,7 +141,7 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="@color/accent"
+                    android:background="#e67e22"
                     android:padding="16dp"
                     android:orientation="horizontal"
                     android:gravity="center_vertical">

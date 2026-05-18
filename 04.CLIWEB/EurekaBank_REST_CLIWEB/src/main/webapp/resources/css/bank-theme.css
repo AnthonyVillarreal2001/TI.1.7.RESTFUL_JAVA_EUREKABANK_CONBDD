@@ -1,0 +1,84 @@
+/* Bank Theme CSS - central theme for all web views */
+:root{
+  --primary: #0a3d62;
+  --primary-dark: #0c2d48;
+  --secondary: #e67e22;
+  --secondary-light: #f39c12;
+  --accent: #00a8ff;
+  --success: #2ecc71;
+  --error: #e74c3c;
+  --glass-bg: rgba(255,255,255,0.95);
+  --shadow: 0 12px 30px rgba(0,0,0,0.12);
+}
+
+/* Global reset */
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  font-family: Inter, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  min-height:100vh;
+  color:#222;
+  background-color:var(--primary);
+  background-image: url('../img/fondo.jpeg');
+  background-size: cover;
+  background-position: center center;
+  background-repeat: no-repeat;
+  position:relative;
+}
+/* dark overlay on top of background */
+body::after{
+  content:'';position:fixed;inset:0;background:rgba(0,0,0,0.6);pointer-events:none;z-index:0;backdrop-filter: blur(1px);
+}
+
+.header{
+  position:sticky;top:0;z-index:1000;display:flex;align-items:center;justify-content:space-between;padding:14px 28px;
+  background: rgba(10,61,66,0.85);
+  backdrop-filter: blur(6px);
+  border-bottom:1px solid rgba(255,255,255,0.06);
+}
+.header-left{display:flex;align-items:center;gap:12px}
+.header-left img{height:48px}
+.header-left h1{font-size:1.4rem;margin:0;color:var(--glass-bg);background:linear-gradient(135deg,var(--primary),var(--primary-dark));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.header-right{display:flex;align-items:center;gap:12px}
+.user-chip{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:999px;background:var(--primary);color:white;font-weight:600}
+.user-chip img{width:36px;height:36px;border-radius:50%;object-fit:cover}
+.logout-btn{display:flex;align-items:center;gap:8px;background:linear-gradient(90deg,var(--secondary),var(--secondary-light));color:white;border:none;padding:8px 14px;border-radius:999px;font-weight:700;cursor:pointer;text-decoration:none}
+.logout-btn img{width:18px;height:18px;}
+
+.main{max-width:1200px;margin:36px auto;padding:0 18px;position:relative;z-index:10}
+.grid-container{display:flex;flex-wrap:wrap;gap:20px;justify-content:center}
+.operation-card{width:280px;background:var(--glass-bg);border-radius:16px;overflow:hidden;box-shadow:var(--shadow);transition:transform .25s ease,box-shadow .25s ease;border:3px solid transparent}
+.operation-card:hover{transform:translateY(-8px);box-shadow:0 18px 50px rgba(0,0,0,0.2)}
+.card-icon{height:180px;display:flex;align-items:center;justify-content:center;background:linear-gradient(180deg,var(--primary),var(--primary-dark));}
+.card-icon img{width:84px;height:84px;filter:drop-shadow(0 6px 16px rgba(0,0,0,0.25))}
+.card-title{text-align:center;padding:16px;font-weight:800;color:var(--primary-dark);font-size:1rem}
+.card-form{max-height:0;overflow:hidden;transition:max-height .45s ease,padding .45s ease;background:linear-gradient(180deg,#ffffff, #f9f9f9);padding:0 18px}
+.operation-card.active .card-form{max-height:420px;padding:18px}
+.form-group{margin-bottom:12px}
+label{display:block;margin-bottom:6px;color:#444;font-weight:600}
+input[type=text],input[type=number],input[type=password]{width:100%;padding:12px 16px;border-radius:50px;border:1px solid #e6e6e6;background:white;font-size:.95rem}
+input:focus{outline:none;box-shadow:0 6px 18px rgba(0,0,0,0.08);border-color:var(--primary-dark)}
+.btn{background:linear-gradient(90deg,var(--secondary),var(--secondary-light));color:white;border:none;padding:10px 18px;border-radius:50px;font-weight:800;cursor:pointer;box-shadow:0 10px 24px rgba(230,126,34,0.18);text-transform:uppercase}
+.btn:active{transform:translateY(0)}
+
+/* login card */
+.login{max-width:480px;margin:72px auto;background:var(--glass-bg);border-radius:18px;padding:30px;box-shadow:var(--shadow);position:relative;z-index:20;text-align:center;}
+.login-icon{width:80px;height:80px;margin:0 auto 20px;}
+.login-icon img{width:100%;height:100%;filter:drop-shadow(0 5px 15px rgba(0,0,0,0.2));}
+.login h2{color:var(--primary-dark);margin-bottom:20px;font-size:1.4rem}
+.error{color:var(--error);background:rgba(231,76,60,0.08);padding:12px;border-radius:10px;border-left:4px solid var(--error);margin-top:12px;text-align:left;}
+
+/* Movimientos table */
+.table-responsive{overflow:auto;background:var(--glass-bg);border-radius:12px;padding:12px;box-shadow:var(--shadow)}
+table.movimientos{width:100%;border-collapse:collapse}
+table.movimientos th, table.movimientos td{padding:10px;border-bottom:1px solid #eee;text-align:left}
+.badge{display:inline-block;padding:6px 10px;border-radius:999px;color:white;font-weight:700}
+.badge-dep{background:var(--success)}
+.badge-ret{background:var(--error)}
+.badge-trf{background:linear-gradient(90deg,var(--secondary),var(--secondary-light))}
+
+/* footer */
+.footer{padding:18px;text-align:center;color:rgba(255,255,255,0.8);border-top:1px solid rgba(255,255,255,0.04)}
+
+/* responsive rules */
+@media (max-width:900px){.operation-card{width:45%}.login{margin:40px 16px}}
+@media (max-width:600px){.operation-card{width:100%}.header{flex-direction:column;gap:10px;padding:12px}}

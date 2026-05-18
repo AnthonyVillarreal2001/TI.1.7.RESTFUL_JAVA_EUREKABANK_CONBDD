@@ -4,9 +4,13 @@ import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.util.UIScale;
 import ec.edu.monster.util.Assets;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionListener;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.net.URL;
 import java.util.function.BiConsumer;
 
 public class LoginView extends JFrame {
@@ -14,12 +18,13 @@ public class LoginView extends JFrame {
   private final JTextField txtUser = new JTextField();
   private final JPasswordField txtPass = new JPasswordField();
   private final JButton btnLogin = new JButton("INGRESAR");
+  private final JLabel lblError = new JLabel();
 
   private BiConsumer<String,String> onLogin;
 
   public LoginView() {
     setTitle("EurekaBank | Ingreso");
-    setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
     setMinimumSize(new Dimension(900, 540));
     setLocationRelativeTo(null);
     setContentPane(buildRoot());
@@ -29,7 +34,7 @@ public class LoginView extends JFrame {
   /* ===== UI ===== */
 
   private JComponent buildRoot() {
-    JPanel root = new GradientBackground();
+    BackgroundPanel root = new BackgroundPanel();
     root.setLayout(new BorderLayout());
     root.add(buildHeader(), BorderLayout.NORTH);
     root.add(buildCenterCard(), BorderLayout.CENTER);
@@ -137,6 +142,10 @@ public class LoginView extends JFrame {
     styleField(txtPass, "Contraseña");
     styleButton(btnLogin);
 
+    lblError.setForeground(new Color(231,76,60));
+    lblError.setVisible(false);
+    lblError.setHorizontalAlignment(SwingConstants.CENTER);
+
     // Enter = login
     ActionListener al = e -> fireLogin();
     txtUser.addActionListener(al);
@@ -145,7 +154,8 @@ public class LoginView extends JFrame {
 
     gc.gridy = 0; form.add(txtUser, gc);
     gc.gridy = 1; form.add(txtPass, gc);
-    gc.gridy = 2; gc.insets = new Insets(16, 0, 0, 0); form.add(btnLogin, gc);
+    gc.gridy = 2; form.add(lblError, gc);
+    gc.gridy = 3; gc.insets = new Insets(16, 0, 0, 0); form.add(btnLogin, gc);
 
     return form;
   }
@@ -153,14 +163,14 @@ public class LoginView extends JFrame {
   private void styleField(JTextField field, String placeholder) {
     field.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, placeholder);
     field.putClientProperty(FlatClientProperties.STYLE,
-        "arc:20; margin:4,10,4,10; focusWidth:2;");
+        "arc:50; margin:6,14,6,14; focusWidth:2; background: #FFFFFFEE; ");
     field.setColumns(22);
   }
 
   private void styleButton(JButton b) {
     b.putClientProperty(FlatClientProperties.STYLE,
-        "arc:22; background:#B51217; foreground: white; " +
-        "hoverBackground:#A50F14; pressedBackground:#8E0D11; " +
+        "arc:28; background:#e67e22; foreground: #FFFFFF; " +
+        "hoverBackground:#f39c12; pressedBackground:#d46f12; " +
         "borderWidth:0; innerFocusWidth:0;");
     b.setFont(b.getFont().deriveFont(Font.BOLD, 14f));
     b.setMargin(new Insets(10,10,10,10));
@@ -179,8 +189,13 @@ public class LoginView extends JFrame {
   public void onLogin(BiConsumer<String,String> handler) { this.onLogin = handler; }
 
   public void showError(String msg) {
-    JOptionPane.showMessageDialog(this, msg, "Error en el ingreso", JOptionPane.ERROR_MESSAGE);
+    lblError.setText(msg);
+    lblError.setVisible(true);
+    revalidate();
+    repaint();
   }
+
+  public void clearError(){ lblError.setVisible(false); lblError.setText(""); }
 
   /* ===== Custom painting ===== */
 
@@ -196,6 +211,36 @@ public class LoginView extends JFrame {
       g2.setColor(new Color(90,120,210));
       g2.fillOval((int)(w*0.12), (int)(h*0.18), UIScale.scale(180), UIScale.scale(180));
       g2.fillOval((int)(w*0.70), (int)(h*0.22), UIScale.scale(130), UIScale.scale(130));
+      g2.dispose();
+    }
+  }
+
+  /** Background that paints sullivan.JPG + dark overlay */
+  static class BackgroundPanel extends JPanel {
+    private BufferedImage bg;
+    BackgroundPanel(){ try{ loadBg(); }catch(Exception ignored){} }
+    private void loadBg(){
+      try{
+        URL u = Assets.class.getResource("/ec/edu/monster/util/img/fondo.jpeg");
+        if (u == null) u = Assets.class.getResource("/ec/edu/monster/util/img/fondo.jpg");
+        if (u != null) bg = ImageIO.read(u);
+      } catch(IOException ex){ System.err.println("No se pudo cargar sullivan.JPG: "+ex.getMessage()); }
+    }
+    @Override protected void paintComponent(Graphics g){
+      super.paintComponent(g);
+      Graphics2D g2 = (Graphics2D) g.create();
+      int w = getWidth(), h = getHeight();
+      if (bg != null){
+        double scale = Math.max((double)w / bg.getWidth(), (double)h / bg.getHeight());
+        int iw = (int)(bg.getWidth()*scale), ih = (int)(bg.getHeight()*scale);
+        int x = (w-iw)/2, y = (h-ih)/2;
+        g2.drawImage(bg, x, y, iw, ih, null);
+      } else {
+        g2.setPaint(new GradientPaint(0,0,new Color(10,61,98),0,h,new Color(12,53,109)));
+        g2.fillRect(0,0,w,h);
+      }
+      g2.setColor(new Color(0,0,0,160));
+      g2.fillRect(0,0,w,h);
       g2.dispose();
     }
   }

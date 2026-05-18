@@ -15,7 +15,7 @@ class RestApiService {
     // URL del servidor RESTful
     // 10.0.2.2 es la IP especial del emulador para acceder a localhost de tu PC
     // Si usas dispositivo físico, cambia a tu IP local (ej: 192.168.1.100)
-    private val baseUrl = "http://192.168.100.53:8080/WSEurekaBank_Restfull_Java_G4/resources/"
+    private val baseUrl = "http://10.40.42.135:8080/WSEurekaBank_Restfull_Java_G4/resources/"
     
     private val loggingInterceptor = HttpLoggingInterceptor().apply {
         level = HttpLoggingInterceptor.Level.BODY

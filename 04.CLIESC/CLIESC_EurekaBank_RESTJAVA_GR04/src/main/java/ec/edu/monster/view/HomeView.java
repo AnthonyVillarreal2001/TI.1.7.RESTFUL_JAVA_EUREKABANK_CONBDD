@@ -4,8 +4,16 @@ import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.util.UIScale;
 import ec.edu.monster.util.Assets;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
@@ -63,10 +71,16 @@ public class HomeView extends JFrame {
 
   /* UI */
   private JComponent buildRoot(){
-    JPanel root = new GradientBackground();
+    BackgroundPanel root = new BackgroundPanel();
     root.setLayout(new BorderLayout());
     root.add(buildHeader(), BorderLayout.NORTH);
     root.add(buildCards(), BorderLayout.CENTER);
+    // click outside any card closes opened card
+    root.addMouseListener(new MouseAdapter(){
+      @Override public void mousePressed(MouseEvent e){
+        if (root instanceof BackgroundPanel bp) bp.collapseAllCardsIfOutside(e);
+      }
+    });
     return root;
   }
 
@@ -75,13 +89,13 @@ public class HomeView extends JFrame {
       @Override protected void paintComponent(Graphics g){
         super.paintComponent(g);
         Graphics2D g2 = (Graphics2D) g.create();
-        g2.setPaint(new GradientPaint(0,0,new Color(255,255,255,240),
-                                      0,getHeight(),new Color(255,255,255,220)));
+        // semitransparent header background
+        g2.setColor(new Color(10,61,66,220));
         g2.fillRect(0,0,getWidth(),getHeight());
         g2.dispose();
       }
     };
-    bar.setBorder(BorderFactory.createMatteBorder(0,0,2,0,new Color(200,0,0)));
+    bar.setBorder(BorderFactory.createMatteBorder(0,0,1,0,new Color(0,0,0,50)));
 
     bar.add(buildBrandLeft(), BorderLayout.WEST);
 
@@ -127,17 +141,34 @@ public class HomeView extends JFrame {
 
     GridBagConstraints gc = new GridBagConstraints();
     gc.gridx = 0; gc.gridy = 0; gc.insets = new Insets(24,24,24,24);
-    gc.fill = GridBagConstraints.BOTH; gc.weightx = 1; gc.weighty = 1;
+    gc.fill = GridBagConstraints.NONE; gc.weightx = 0; gc.weighty = 0;
 
-    grid.add(makeCard("Consultar Movimientos", IconType.BARS, buildMovForm()), gc);
+    BackgroundPanel parent = findBackgroundPanel();
+    CardPanel c1 = new CardPanel("Consultar Movimientos", IconType.BARS, buildMovForm(), parent);
+    CardPanel c2 = new CardPanel("Depósito", IconType.MONEY, buildDepForm(), parent);
+    CardPanel c3 = new CardPanel("Retiro", IconType.WALLET, buildRetForm(), parent);
+    CardPanel c4 = new CardPanel("Transferencia", IconType.CARD, buildTrfForm(), parent);
+
+    grid.add(c1, gc);
     gc.gridx++;
-    grid.add(makeCard("Depósito", IconType.MONEY, buildDepForm()), gc);
+    grid.add(c2, gc);
     gc.gridx++;
-    grid.add(makeCard("Retiro", IconType.WALLET, buildRetForm()), gc);
+    grid.add(c3, gc);
     gc.gridx++;
-    grid.add(makeCard("Transferencia", IconType.CARD, buildTrfForm()), gc);
+    grid.add(c4, gc);
+
+    if (parent != null) parent.registerCard(c1);
+    if (parent != null) parent.registerCard(c2);
+    if (parent != null) parent.registerCard(c3);
+    if (parent != null) parent.registerCard(c4);
 
     return grid;
+  }
+
+  private BackgroundPanel findBackgroundPanel(){
+    Container c = getContentPane();
+    if (c instanceof BackgroundPanel) return (BackgroundPanel)c;
+    return null;
   }
 
   private JComponent buildMovForm(){
@@ -197,13 +228,12 @@ public class HomeView extends JFrame {
   }
 
   private JComponent makeCard(String title, IconType icon, JComponent bottom){
+    // kept for backwards compatibility; not used in new flow
     JPanel card = new JPanel(new BorderLayout());
     card.setOpaque(false);
-
     CardHeader header = new CardHeader(title, icon);
     header.setPreferredSize(new Dimension(260, 240));
     card.add(header, BorderLayout.CENTER);
-
     card.add(bottom, BorderLayout.SOUTH);
     return card;
   }
@@ -235,8 +265,8 @@ public class HomeView extends JFrame {
 
   private void stylePrimary(JButton b){
     b.putClientProperty(FlatClientProperties.STYLE,
-        "arc:22; background:#B51217; foreground: white; " +
-        "hoverBackground:#A50F14; pressedBackground:#8E0D11; " +
+        "arc:22; background:#e67e22; foreground: white; " +
+        "hoverBackground:#f39c12; pressedBackground:#d46f12; " +
         "borderWidth:0; innerFocusWidth:0;");
     b.setFont(b.getFont().deriveFont(Font.BOLD, 13f));
     b.setMargin(new Insets(8, 10, 8, 10));
@@ -244,16 +274,16 @@ public class HomeView extends JFrame {
 
   private void styleUserChip(JButton b){
     b.putClientProperty(FlatClientProperties.STYLE,
-        "arc:999; background:#1E5CCB; foreground: white; " +
-        "hoverBackground:#184EA9; pressedBackground:#143F88; borderWidth:0;");
+        "arc:999; background:#0a3d62; foreground: white; " +
+        "hoverBackground:#0c2d48; pressedBackground:#08293e; borderWidth:0;");
     b.setFocusable(false);
   }
 
   private void styleLogout(JButton b){
     b.setText("Cerrar Sesión");
     b.putClientProperty(FlatClientProperties.STYLE,
-        "arc:999; background:#B51217; foreground:white; " +
-        "hoverBackground:#A50F14; pressedBackground:#8E0D11; borderWidth:0;");
+        "arc:999; background:#e67e22; foreground:white; " +
+        "hoverBackground:#f39c12; pressedBackground:#d46f12; borderWidth:0;");
     b.setFocusable(false);
     b.addActionListener(e -> dispose());
   }
@@ -283,6 +313,45 @@ public class HomeView extends JFrame {
     }
   }
 
+  /** New background panel that draws sullivan.JPG (if present) + overlay and manages cards. */
+  static class BackgroundPanel extends JPanel {
+    private BufferedImage bgImage;
+    private final List<CardPanel> cards = new ArrayList<>();
+    BackgroundPanel(){ try { loadBg(); } catch(Exception ignored){} }
+    private void loadBg(){
+      try {
+        URL u = Assets.class.getResource("/ec/edu/monster/util/img/fondo.jpeg");
+        if (u == null) u = Assets.class.getResource("/ec/edu/monster/util/img/fondo.jpg");
+        if (u != null) bgImage = ImageIO.read(u);
+      } catch (IOException ex){ System.err.println("[Assets] No se pudo leer sullivan.JPG: "+ex.getMessage()); }
+    }
+    void registerCard(CardPanel c){ cards.add(c); }
+    void collapseAllExcept(CardPanel except){ for(CardPanel c: cards) if (c!=except) c.closeInstant(); }
+    void collapseAllCardsIfOutside(MouseEvent e){
+      for(CardPanel c: cards){ if (c.getBounds().contains(e.getPoint())) return; }
+      for(CardPanel c: cards) c.closeInstant();
+    }
+    @Override protected void paintComponent(Graphics g){
+      super.paintComponent(g);
+      Graphics2D g2 = (Graphics2D) g.create();
+      int w = getWidth(), h = getHeight();
+      if (bgImage != null){
+        double imgW = bgImage.getWidth(), imgH = bgImage.getHeight();
+        double scale = Math.max((double)w / imgW, (double)h / imgH);
+        int iw = (int)(imgW * scale), ih = (int)(imgH * scale);
+        int x = (w - iw)/2, y = (h - ih)/2;
+        g2.drawImage(bgImage, x, y, iw, ih, null);
+      } else {
+        g2.setPaint(new GradientPaint(0,0,new Color(10,61,98), 0,h,new Color(12,53,109)));
+        g2.fillRect(0,0,w,h);
+      }
+      // dark overlay
+      g2.setColor(new Color(0,0,0,160));
+      g2.fillRect(0,0,w,h);
+      g2.dispose();
+    }
+  }
+
   enum IconType { BARS, MONEY, WALLET, CARD }
 
   static class CardHeader extends JComponent {
@@ -292,8 +361,8 @@ public class HomeView extends JFrame {
       Graphics2D g2 = (Graphics2D) g.create();
       g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
       int w=getWidth(), h=getHeight(), arc=UIScale.scale(22);
-
-      GradientPaint gp = new GradientPaint(0,0,new Color(204,0,0), 0,h,new Color(11,64,135));
+      // use theme primary -> primary-dark gradient
+      GradientPaint gp = new GradientPaint(0,0,new Color(10,61,98), 0,h,new Color(12,45,72));
       g2.setPaint(gp);
       g2.fillRoundRect(0,0,w,h,arc,arc);
 
@@ -334,6 +403,89 @@ public class HomeView extends JFrame {
         }
       }
       g2.dispose();
+    }
+  }
+
+  /** CardPanel: header + collapsible bottom content. */
+  static class CardPanel extends JPanel {
+    private final CardHeader header;
+    private final AnimatedPanel animated;
+    private boolean open = false;
+    private final BackgroundPanel parent;
+
+    CardPanel(String title, IconType type, JComponent content, BackgroundPanel parent){
+      this.header = new CardHeader(title, type);
+      this.parent = parent;
+      setLayout(new BorderLayout());
+      setOpaque(false);
+      header.setPreferredSize(new Dimension(280, 160));
+
+      animated = new AnimatedPanel(content);
+      animated.setVisible(false);
+
+      add(header, BorderLayout.NORTH);
+      add(animated, BorderLayout.CENTER);
+      setBorder(BorderFactory.createEmptyBorder(6,6,6,6));
+
+      header.addMouseListener(new MouseAdapter(){
+        @Override public void mouseClicked(MouseEvent e){ toggle(); }
+      });
+    }
+
+    void toggle(){ if (open) animateClose(); else animateOpen(); }
+
+    void animateOpen(){
+      if (parent!=null) parent.collapseAllExcept(this);
+      if (open) return;
+      animated.setVisible(true);
+      animated.animate(true);
+      open = true;
+    }
+
+    void animateClose(){
+      if (!open) return;
+      animated.animate(false);
+      open = false;
+    }
+
+    void closeInstant(){ animated.setVisible(false); open = false; }
+
+    /** AnimatedPanel wraps the content and animates height */
+    static class AnimatedPanel extends JPanel {
+      private final JComponent content;
+      private int currentHeight = 0;
+      private int targetHeight = 0;
+      private Timer timer;
+      AnimatedPanel(JComponent content){
+        this.content = content;
+        setLayout(new BorderLayout());
+        setOpaque(false);
+        add(content, BorderLayout.CENTER);
+        content.setOpaque(false);
+      }
+      @Override public Dimension getPreferredSize(){
+        Dimension d = content.getPreferredSize();
+        return new Dimension(d.width, currentHeight);
+      }
+      void animate(boolean opening){
+        if (timer != null && timer.isRunning()) timer.stop();
+        // compute full height
+        content.setVisible(true);
+        Dimension full = content.getPreferredSize();
+        targetHeight = opening ? full.height : 0;
+        int step = Math.max(6, Math.round(full.height / 10f));
+        timer = new Timer(15, e -> {
+          if (opening){
+            currentHeight = Math.min(targetHeight, currentHeight + step);
+            if (currentHeight >= targetHeight){ ((Timer)e.getSource()).stop(); }
+          } else {
+            currentHeight = Math.max(0, currentHeight - step);
+            if (currentHeight <= 0){ ((Timer)e.getSource()).stop(); setVisible(false); }
+          }
+          revalidate(); repaint();
+        });
+        timer.start();
+      }
     }
   }
 

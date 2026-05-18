@@ -9,7 +9,7 @@ android {
     compileSdk = 34 // ✅ Usa número directo (36 aún no es estable)
 
     defaultConfig {
-        applicationId = "ec.edu.monster"
+        applicationId = "rest.ec.edu.monster"
         minSdk = 24
         targetSdk = 34
         versionCode = 1
